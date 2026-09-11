@@ -18,15 +18,13 @@ function Home() {
   const [depth, setDepth] = useState('standard');
   const [sort, setSort] = useState('newest');
 
-  const { articles, status, error } = useNews({ category, query });
+  const { articles, status, error, retry } = useNews({ category, query });
 
-  // Picking a category abandons the current search, so the two never fight.
   function handleCategoryChange(nextCategory) {
     setQuery('');
     setCategory(nextCategory);
   }
 
-  // Copy before sorting — .sort() mutates, and mutating state is a React bug.
   const sortedArticles = useMemo(() => {
     return [...articles].sort((a, b) => {
       const aTime = new Date(a.publishedAt).getTime() || 0;
@@ -44,7 +42,7 @@ function Home() {
       <main className="mx-auto w-full max-w-5xl px-4 py-8">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Flash News</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Headlines from India, updated continuously.
+          Top stories from India · free GNews tier, 12-hour delay
         </p>
 
         <div className="mt-6 space-y-3">
@@ -65,9 +63,9 @@ function Home() {
         </div>
 
         <div className="mt-6">
-          {status === 'loading' && <LoadingState />}
-          {status === 'error' && <ErrorState message={error} />}
-          {status === 'empty' && <EmptyState />}
+          {status === 'loading' && <LoadingState depth={depth} />}
+          {status === 'error' && <ErrorState message={error} onRetry={retry} />}
+          {status === 'empty' && <EmptyState query={query} onClear={() => setQuery('')} />}
           {status === 'success' && <NewsGrid articles={sortedArticles} depth={depth} />}
         </div>
       </main>

@@ -1,10 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-const MAX_LENGTH = 400;
+const MAX_LENGTH = 100;
 
 function SearchBar({ onSearch, onClear, isLoading, activeQuery }) {
   const [value, setValue] = useState('');
   const [error, setError] = useState('');
+
+  // When the search is cleared from anywhere else — the empty state's button,
+  // or picking a category — empty this box too.
+  useEffect(() => {
+    if (!activeQuery) {
+      setValue('');
+      setError('');
+    }
+  }, [activeQuery]);
 
   function handleSubmit(event) {
     event.preventDefault();

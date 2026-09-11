@@ -1,14 +1,17 @@
 const BASE_URL = '/gnews';
 const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
 
-// GNews returns its own field names. We flatten every article into one
-// shape so no component ever depends on GNews specifically.
+function cleanContent(text) {
+  if (!text) return '';
+  return text.replace(/\s*\[\+?\d+\s*chars?\]\s*$/i, '').replace(/\.{3}\s*$/, '').trim();
+}
+
 function normalise(article) {
   return {
     id: article.url,
     title: article.title,
     description: article.description || '',
-    content: article.content || '',
+    content: cleanContent(article.content),
     url: article.url,
     image: article.image || null,
     publishedAt: article.publishedAt,
@@ -30,7 +33,18 @@ async function request(endpoint, params, signal) {
   }
 
   const query = new URLSearchParams({ ...params, lang: 'en', apikey: API_KEY });
-  const response = await fetch(`${BASE_URL}/${endpoint}?${query}`, { signal });
+
+  let response;
+  try {
+    response = await fetch(`${BASE_URL}/${endpoint}?${query}`, { signal });
+  } catch (networkError) {
+    if (networkError.name === 'AbortError') throw networkError;
+    throw new Error(
+      navigator.onLine
+        ? 'Could not reach the news service. Check your connection and try again.'
+        : 'You’re offline. Reconnect and try again.'
+    );
+  }
 
   if (!response.ok) throw new Error(messageFor(response.status));
 
