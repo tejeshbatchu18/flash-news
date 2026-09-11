@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+/* Project-wide base tokens. Detailed theming comes in a later step. */
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
