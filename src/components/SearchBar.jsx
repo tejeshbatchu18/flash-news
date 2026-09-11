@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-const MAX_LENGTH = 100;
+const MAX_LENGTH = 400;
 
 function SearchBar({ onSearch, onClear, isLoading, activeQuery }) {
   const [value, setValue] = useState('');
