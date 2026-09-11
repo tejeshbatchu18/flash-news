@@ -1,4 +1,4 @@
-const BASE_URL = 'https://gnews.io/api/v4';
+const BASE_URL = '/gnews';
 const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
 
 // GNews returns its own field names. We flatten every article into one
