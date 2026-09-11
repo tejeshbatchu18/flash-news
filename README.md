@@ -31,7 +31,7 @@ A fast, mobile-first news reader for people on a weak or limited connection.
 | *Stretch:* saved / bookmarked articles | **Delivered** | `useBookmarks.js`, `SavedNews.jsx` |
 | *Stretch:* AI-powered news summaries | **Not delivered** | See below |
 
-**Also built, beyond the card:** a Trending feed that blends five categories, article sharing, and API key rotation.
+**Also built, beyond the card:** a Trending feed that blends five categories, and article sharing.
 
 ### Why AI summaries were not delivered
 
@@ -75,7 +75,7 @@ cache.js      useLocalStorage()
         localStorage
 ```
 
-**`services/newsApi.js`** is the only file that knows a network exists. It builds requests, rotates API keys, maps GNews's response into our own flat article shape, and translates HTTP status codes into sentences a person can read. Swapping providers touches this file and nothing else.
+**`services/newsApi.js`** is the only file that knows a network exists. It builds requests, maps GNews's response into our own flat article shape, and translates HTTP status codes into sentences a person can read. Swapping providers touches this file and nothing else.
 
 **`hooks/useNews.js`** owns request state as a single `status` string — `idle | loading | success | error | empty` — rather than separate booleans. Booleans can represent contradictions (loading *and* error at once, which is how frozen spinners happen); one status can only ever be in one state, so the UI cannot disagree with itself. It also aborts in-flight requests when the category or query changes, so a slow old response can never overwrite a newer one.
 
@@ -87,7 +87,7 @@ cache.js      useLocalStorage()
 
 **CORS on the deployed origin.** GNews accepts browser requests from `localhost` but not from our Vercel domain. Rather than add a server, `vercel.json` rewrites `/gnews/*` to the GNews API, so the browser makes a same-origin request and Vercel forwards it server-side. The Vite dev proxy mirrors the same path locally, so development and production behave identically.
 
-**Quota.** The free tier allows 100 requests per key per day. We rotate across four teammates' keys, retrying the next key automatically on 403/429 and remembering which one worked. Combined with the 15-minute cache, this makes the limit a non-issue in practice.
+**Quota.** The free tier allows 100 requests per day, which is tight with a team testing at once. The 15-minute cache is what makes it workable — revisiting a category costs nothing, so only genuinely new requests count against the limit. When the limit is reached, the error message says so explicitly rather than blaming the key.
 
 ---
 
@@ -118,20 +118,17 @@ npm run preview
 
 ### Environment variables
 
-Copy `.env.example` to `.env` and add at least one GNews key:
+Copy `.env.example` to `.env` and add your GNews key:
 
 ```
 VITE_NEWS_API_KEY=your_key
-VITE_NEWS_API_KEY_2=
-VITE_NEWS_API_KEY_3=
-VITE_NEWS_API_KEY_4=
 ```
 
-Keys 2–4 are optional; blanks are skipped. Vite reads `.env` only at startup, so restart the dev server after editing it.
+Vite reads `.env` only at startup, so restart the dev server after editing it.
 
-For deployment, the same variables must be added in **Vercel → Settings → Environment Variables**, followed by a redeploy — Vite bakes them into the bundle at build time, so adding one does nothing until a new build runs.
+For deployment, the same variable must be added in **Vercel → Settings → Environment Variables**, followed by a redeploy — Vite bakes it into the bundle at build time, so adding it does nothing until a new build runs.
 
-> **Note on secrecy:** a frontend environment variable is not a secret. It ships inside the bundle and anyone can read it in DevTools. `.env` keeps keys out of the public repo; key rotation is a quota strategy, not a security one. Hiding them would require a backend, which this project deliberately does not have.
+> **Note on secrecy:** a frontend environment variable is not a secret. It ships inside the bundle and anyone can read it in DevTools. `.env` keeps the key out of the public repo, nothing more. Hiding it would require a backend, which this project deliberately does not have.
 
 ---
 
@@ -159,10 +156,11 @@ FlashNews/
 
 These are GNews free-tier constraints, not bugs, and they are surfaced in the UI rather than hidden:
 
+- **100 requests per day** — mitigated by the 15-minute cache, but a heavy testing session can exhaust it
 - **Ten articles per request** — the free plan's hard ceiling
 - **12-hour delay** — real-time availability is a paid feature, so the subtitle says so plainly rather than claiming live news
 - **Truncated article text** — full content is paid-only. "Detailed" view shows the description plus whatever content is available, then links out to the publisher. We do not pretend to host the full article
-- **Trending costs five requests** per fresh load, absorbed by the cache and key rotation
+- **Trending costs five requests** per fresh load, absorbed by the cache
 
 ---
 
@@ -170,7 +168,7 @@ These are GNews free-tier constraints, not bugs, and they are surfaced in the UI
 
 Per the hackathon AI policy, the following tools were used:
 
-- **Claude (Anthropic)** — used throughout the build: project scaffolding, the GNews service layer and key rotation, the `useNews` status machine, the caching and bookmark hooks, component implementation and Tailwind styling, debugging (CORS on the deployed origin, a missing `<a>` tag, a stubbed `useLocalStorage`), and this README.
+- **Claude (Anthropic)** — used throughout the build: project scaffolding, the GNews service layer, the `useNews` status machine, the caching and bookmark hooks, component implementation and Tailwind styling, debugging (CORS on the deployed origin, a missing `<a>` tag, a stubbed `useLocalStorage`), and this README.
 
 All code in this repository has been read by the team. Every member can explain and modify the files they own.
 
@@ -189,5 +187,5 @@ All code in this repository has been read by the team. Every member can explain 
 
 ## Team
 
-Team leader-Ch.Dhanush Kumar
+Name One · Name Two · Name Three · Name Four
 PVPSIT Frontend Hackathon, 11 September 2026
