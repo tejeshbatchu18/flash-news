@@ -1,6 +1,10 @@
+import { truncate, LIMITS } from '../utils/text.js';
+
 function EmptyState({ query, onClear, title, message }) {
+  const shown = truncate(query, LIMITS.query);
+
   const heading =
-    title || (query ? `No stories match “${query}”` : 'Nothing in this category right now');
+    title || (shown ? `No stories match “${shown}”` : 'Nothing in this category right now');
 
   const body =
     message ||
@@ -9,8 +13,8 @@ function EmptyState({ query, onClear, title, message }) {
       : 'GNews returned no articles for this category. Try another one.');
 
   return (
-    <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
-      <h2 className="text-base font-semibold text-slate-900">{heading}</h2>
+    <div className="flex flex-col items-center gap-3 overflow-hidden rounded-lg border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+      <h2 className="max-w-full text-base font-semibold break-words text-slate-900">{heading}</h2>
       <p className="max-w-sm text-sm text-slate-600">{body}</p>
 
       {query && onClear && (
