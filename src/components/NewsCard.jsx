@@ -3,10 +3,28 @@ import { formatRelativeTime } from '../utils/formatDate.js';
 
 function NewsCard({ article, depth = 'standard', isBookmarked = false, onToggleBookmark }) {
   const [imageFailed, setImageFailed] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const quick = depth === 'quick';
   const detailed = depth === 'detailed';
   const showImage = !quick && article.image && !imageFailed;
+
+  async function handleShare() {
+    const data = { title: article.title, text: article.description, url: article.url };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(data);
+      } else {
+        await navigator.clipboard.writeText(article.url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch {
+      // User dismissed the share sheet, or the clipboard was blocked.
+      // Neither is an error worth showing.
+    }
+  }
 
   return (
     <article className="flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white transition hover:border-slate-300 hover:shadow-sm">
@@ -28,27 +46,38 @@ function NewsCard({ article, depth = 'standard', isBookmarked = false, onToggleB
 
       <div className={`flex flex-1 flex-col gap-2 ${quick ? 'p-3' : 'p-4'}`}>
         <div className="flex items-center gap-2 text-xs text-slate-500">
-          <span className="truncate font-medium text-slate-700">{article.source}</span>
+          <span className="min-w-0 truncate font-medium text-slate-700">{article.source}</span>
           <span aria-hidden="true">·</span>
           <time dateTime={article.publishedAt} className="whitespace-nowrap">
             {formatRelativeTime(article.publishedAt)}
           </time>
 
-          {onToggleBookmark && (
+          <div className="ml-auto flex shrink-0 items-center gap-1">
             <button
               type="button"
-              onClick={() => onToggleBookmark(article)}
-              aria-pressed={isBookmarked}
-              aria-label={isBookmarked ? 'Remove from saved' : 'Save article'}
-              className={`ml-auto shrink-0 rounded px-2 py-0.5 text-xs font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 ${
-                isBookmarked
-                  ? 'bg-rose-100 text-rose-800'
-                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
-              }`}
+              onClick={handleShare}
+              aria-label={`Share: ${article.title}`}
+              className="rounded px-2 py-0.5 text-xs font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"
             >
-              {isBookmarked ? 'Saved' : 'Save'}
+              {copied ? 'Copied' : 'Share'}
             </button>
-          )}
+
+            {onToggleBookmark && (
+              <button
+                type="button"
+                onClick={() => onToggleBookmark(article)}
+                aria-pressed={isBookmarked}
+                aria-label={isBookmarked ? 'Remove from saved' : 'Save article'}
+                className={`rounded px-2 py-0.5 text-xs font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 ${
+                  isBookmarked
+                    ? 'bg-rose-100 text-rose-800'
+                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+                }`}
+              >
+                {isBookmarked ? 'Unsave' : 'Save'}
+              </button>
+            )}
+          </div>
         </div>
 
         <h3
