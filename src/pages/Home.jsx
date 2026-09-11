@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import Header from '../components/Header.jsx';
 import FlashTicker from '../components/FlashTicker.jsx';
 import SearchBar from '../components/SearchBar.jsx';
@@ -11,14 +11,17 @@ import EmptyState from '../components/EmptyState.jsx';
 import ErrorState from '../components/ErrorState.jsx';
 import OfflineBanner from '../components/OfflineBanner.jsx';
 import useNews from '../hooks/useNews.js';
+import useLocalStorage from '../hooks/useLocalStorage.js';
+import useBookmarks from '../hooks/useBookmarks.js';
 
 function Home() {
-  const [category, setCategory] = useState('general');
-  const [query, setQuery] = useState('');
-  const [depth, setDepth] = useState('standard');
-  const [sort, setSort] = useState('newest');
+  const [category, setCategory] = useLocalStorage('flashnews:category', 'general');
+  const [query, setQuery] = useLocalStorage('flashnews:query', '');
+  const [depth, setDepth] = useLocalStorage('flashnews:depth', 'standard');
+  const [sort, setSort] = useLocalStorage('flashnews:sort', 'newest');
 
-  const { articles, status, error, retry } = useNews({ category, query });
+  const { articles, status, error, fromCache, retry } = useNews({ category, query });
+  const { bookmarks, isBookmarked, toggleBookmark } = useBookmarks();
 
   function handleCategoryChange(nextCategory) {
     setQuery('');
@@ -36,7 +39,7 @@ function Home() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <OfflineBanner />
-      <Header />
+      <Header savedCount={bookmarks.length} active="home" />
       <FlashTicker articles={articles} />
 
       <main className="mx-auto w-full max-w-5xl px-4 py-8">
@@ -62,11 +65,24 @@ function Home() {
           />
         </div>
 
+        {fromCache && status === 'success' && (
+          <p className="mt-4 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900">
+            Showing saved articles — not refreshed from GNews.
+          </p>
+        )}
+
         <div className="mt-6">
           {status === 'loading' && <LoadingState depth={depth} />}
           {status === 'error' && <ErrorState message={error} onRetry={retry} />}
           {status === 'empty' && <EmptyState query={query} onClear={() => setQuery('')} />}
-          {status === 'success' && <NewsGrid articles={sortedArticles} depth={depth} />}
+          {status === 'success' && (
+            <NewsGrid
+              articles={sortedArticles}
+              depth={depth}
+              isBookmarked={isBookmarked}
+              onToggleBookmark={toggleBookmark}
+            />
+          )}
         </div>
       </main>
     </div>

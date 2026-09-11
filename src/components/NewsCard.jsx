@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { formatRelativeTime } from '../utils/formatDate.js';
 
-function NewsCard({ article, depth = 'standard' }) {
+function NewsCard({ article, depth = 'standard', isBookmarked = false, onToggleBookmark }) {
   const [imageFailed, setImageFailed] = useState(false);
 
   const quick = depth === 'quick';
@@ -33,6 +33,22 @@ function NewsCard({ article, depth = 'standard' }) {
           <time dateTime={article.publishedAt} className="whitespace-nowrap">
             {formatRelativeTime(article.publishedAt)}
           </time>
+
+          {onToggleBookmark && (
+            <button
+              type="button"
+              onClick={() => onToggleBookmark(article)}
+              aria-pressed={isBookmarked}
+              aria-label={isBookmarked ? 'Remove from saved' : 'Save article'}
+              className={`ml-auto shrink-0 rounded px-2 py-0.5 text-xs font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 ${
+                isBookmarked
+                  ? 'bg-rose-100 text-rose-800'
+                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              {isBookmarked ? 'Saved' : 'Save'}
+            </button>
+          )}
         </div>
 
         <h3
@@ -57,16 +73,7 @@ function NewsCard({ article, depth = 'standard' }) {
           <p className="text-sm leading-relaxed text-slate-700">{article.content}</p>
         )}
 
-        
-          <a href={article.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`mt-auto pt-2 font-medium text-rose-700 underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 ${
-            quick ? 'text-xs' : 'text-sm'
-          }`}
-        >
-          {quick ? 'Open' : 'Read full article'}
-        </a>
+        <a href={article.url} target="_blank" rel="noopener noreferrer" className={`mt-auto pt-2 font-medium text-rose-700 underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 ${quick ? 'text-xs' : 'text-sm'}`}>{quick ? 'Open' : 'Read full article'}</a>
       </div>
     </article>
   );

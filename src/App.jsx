@@ -1,8 +1,21 @@
+import { useEffect, useState } from 'react';
 import Home from './pages/Home.jsx';
+import SavedNews from './pages/SavedNews.jsx';
 
-// Routing between Home and SavedNews will be added in a later step.
+function currentRoute() {
+  return window.location.hash === '#/saved' ? 'saved' : 'home';
+}
+
 function App() {
-  return <Home />;
+  const [route, setRoute] = useState(currentRoute);
+
+  useEffect(() => {
+    const onHashChange = () => setRoute(currentRoute());
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  return route === 'saved' ? <SavedNews /> : <Home />;
 }
 
 export default App;
