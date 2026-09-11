@@ -1,10 +1,18 @@
 import NewsCard from './NewsCard.jsx';
 
-// Renders the list of articles. Data wiring comes later.
-function NewsGrid() {
+function NewsGrid({ articles = [], depth = 'standard' }) {
+  const columns =
+    depth === 'quick'
+      ? 'grid-cols-1'
+      : depth === 'detailed'
+        ? 'grid-cols-1 lg:grid-cols-2'
+        : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3';
+
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <NewsCard />
+    <div className={`grid gap-4 ${columns}`}>
+      {articles.map((article) => (
+        <NewsCard key={article.id} article={article} depth={depth} />
+      ))}
     </div>
   );
 }

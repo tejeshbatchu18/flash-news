@@ -1,17 +1,51 @@
-// News API layer. No requests are made yet.
-// The key will be read from import.meta.env.VITE_NEWS_API_KEY when implemented.
+const BASE_URL = 'https://gnews.io/api/v4';
+const API_KEY = import.meta.env.VITE_NEWS_API_KEY;
 
-export async function getTopHeadlines() {
-  // TODO: fetch the latest headlines.
-  throw new Error('getTopHeadlines is not implemented yet');
+// GNews returns its own field names. We flatten every article into one
+// shape so no component ever depends on GNews specifically.
+function normalise(article) {
+  return {
+    id: article.url,
+    title: article.title,
+    description: article.description || '',
+    content: article.content || '',
+    url: article.url,
+    image: article.image || null,
+    publishedAt: article.publishedAt,
+    source: article.source?.name || 'Unknown',
+  };
 }
 
-export async function searchNews() {
-  // TODO: fetch articles matching a query.
-  throw new Error('searchNews is not implemented yet');
+function messageFor(status) {
+  if (status === 400) return 'Bad request — check the API key in your .env file.';
+  if (status === 401 || status === 403) return 'API key rejected. Check it is active.';
+  if (status === 429) return 'Daily request limit reached. Try another key.';
+  if (status >= 500) return 'GNews is having trouble. Try again in a moment.';
+  return 'Could not load news. Please try again.';
 }
 
-export async function getNewsByCategory() {
-  // TODO: fetch articles for a category.
-  throw new Error('getNewsByCategory is not implemented yet');
+async function request(endpoint, params, signal) {
+  if (!API_KEY) {
+    throw new Error('No API key found. Add VITE_NEWS_API_KEY to .env and restart the server.');
+  }
+
+  const query = new URLSearchParams({ ...params, lang: 'en', apikey: API_KEY });
+  const response = await fetch(`${BASE_URL}/${endpoint}?${query}`, { signal });
+
+  if (!response.ok) throw new Error(messageFor(response.status));
+
+  const data = await response.json();
+  return (data.articles || []).map(normalise);
+}
+
+export function getTopHeadlines({ category = 'general', max = 10, signal } = {}) {
+  return request('top-headlines', { category, country: 'in', max }, signal);
+}
+
+export function searchNews({ query, max = 10, signal } = {}) {
+  return request('search', { q: query, max, sortby: 'publishedAt' }, signal);
+}
+
+export function getNewsByCategory(category, options = {}) {
+  return getTopHeadlines({ ...options, category });
 }
