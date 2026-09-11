@@ -1,93 +1,121 @@
 # Flash News
 
-## Description
-
-A modern, responsive news website. It will provide flash/latest news, category
-browsing, search, multiple news-detail levels, offline caching and robust
-loading / empty / error states.
-
-This repository currently contains the **project skeleton only** — the folder
-structure, configuration and placeholder files. Features are implemented step by
-step.
+Flash News is a responsive React news reader for browsing current headlines and
+searching articles from GNews. The current app is focused on the home feed and
+the core reading workflow; some planned persistence features are still pending.
 
 ## Tech Stack
 
-- React
-- Vite
-- JavaScript (JSX) — no TypeScript
-- Tailwind CSS
+- React 19
+- Vite 7
+- JavaScript and JSX (no TypeScript)
+- Tailwind CSS 4 through `@tailwindcss/vite`
+- GNews API v4 for article data
 
-Frontend only. There is no backend in this project.
+The project is frontend-only. Vite proxies local `/gnews` requests to GNews in
+development, and Vercel uses the rewrite in `vercel.json` in production.
+
+## Current Workflow
+
+1. The home page requests top headlines for the selected category, using India
+	as the country and English as the language.
+2. Users can browse the available categories: Top, India, World, Business,
+	Tech, Sports, Entertainment, Science, and Health.
+3. Submitting a search term switches the request to the GNews search endpoint
+	and sorts results by publication date from the API.
+4. Results can be sorted locally from newest to oldest, and displayed in Quick,
+	Standard, or Detailed reading views.
+5. Each article card shows source, relative publication time, available image,
+	summary, and a link to the original article.
+6. Loading, empty, API error, retry, and browser offline states are handled in
+	the UI.
 
 ## Project Structure
 
 ```
-FlashNews/
-├── public/               Static assets served as-is (favicon, etc.)
+flash-news/
+├── public/               Static assets served as-is
 ├── src/
-│   ├── components/       Reusable UI pieces (header, cards, states, bars)
-│   ├── pages/            Top-level screens (Home, SavedNews)
-│   ├── hooks/            Custom React hooks (data fetching, localStorage)
-│   ├── services/         External data access (News API client)
-│   ├── utils/            Pure helpers (caching, date formatting)
+│   ├── components/       Header, controls, article cards, and UI states
+│   ├── pages/             Home screen and planned saved-news screen
+│   ├── hooks/             News fetching and localStorage hooks
+│   ├── services/          GNews API client and response normalisation
+│   ├── utils/             Date formatting and planned cache helpers
 │   ├── App.jsx           Application root
 │   ├── main.jsx          React entry point
-│   └── index.css         Tailwind import and base styles
-├── .env.example          Template for environment variables
+│   └── index.css          Tailwind import and global styles
+├── .env.example           Environment variable template
 ├── index.html            Minimal HTML shell
-├── vite.config.js        Vite + React + Tailwind plugins
-└── package.json
+├── vite.config.js         Vite, React, Tailwind, and GNews proxy config
+├── vercel.json             Production GNews rewrite
+└── package.json            Scripts and dependencies
 ```
 
-## Tailwind Setup
+## Getting Started
 
-This project uses **Tailwind CSS v4**, which is configured through the Vite
-plugin (`@tailwindcss/vite` in `vite.config.js`) plus a single
-`@import "tailwindcss";` at the top of `src/index.css`. There is intentionally
-no `tailwind.config.js` and no `postcss.config.js` — v4 does not need them.
-Theme customisation, when we need it, goes in `index.css` under `@theme`.
+### Requirements
 
-## Setup
+- Node.js 20 or newer recommended
+- An API key from [GNews](https://gnews.io/)
+
+### Install and run
 
 ```bash
 npm install
+copy .env.example .env
 npm run dev
 ```
 
-Then open the URL Vite prints (http://localhost:5173 by default).
+Add your key to `.env` before starting or restarting the development server:
 
-Production build:
+```bash
+VITE_NEWS_API_KEY=your_gnews_api_key
+```
+
+Open the URL printed by Vite, normally `http://localhost:5173`.
+
+### Production build
 
 ```bash
 npm run build
 npm run preview
 ```
 
+The production deployment can be hosted on Vercel. Configure
+`VITE_NEWS_API_KEY` in the project environment settings before building.
+
+## Available Scripts
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the Vite development server |
+| `npm run build` | Create a production build in `dist/` |
+| `npm run preview` | Preview the production build locally |
+
 ## Environment Variables
 
-Copy `.env.example` to `.env` and add your News API key:
+The app currently uses one Vite client-side variable:
 
 ```
 VITE_NEWS_API_KEY=your_key_here
 ```
 
-The key is read in code via `import.meta.env.VITE_NEWS_API_KEY`. No real key is
-stored in this repository, and `.env` is git-ignored.
+The key is read through `import.meta.env.VITE_NEWS_API_KEY`. Do not commit a
+real key; `.env` is ignored by Git.
 
-## Development Plan
+## Implementation Status
 
-Features are built one at a time, on top of this skeleton:
-
-1. Project skeleton (done)
-2. News API service + `useNews` hook
-3. Flash news and category feed
-4. Search and filtering
-5. News depth (short / medium / detailed)
-6. localStorage caching and offline mode
-7. Loading, empty and error states everywhere
-8. Bookmarks / saved news
-9. Polish, responsiveness at 375px, accessibility
+- [x] GNews service and article normalisation
+- [x] Category-based top headlines
+- [x] Article search
+- [x] Newest/oldest sorting
+- [x] Quick, Standard, and Detailed reading views
+- [x] Loading, empty, error, retry, and offline banner states
+- [x] Responsive layout with Tailwind CSS
+- [ ] Functional localStorage article caching
+- [ ] Saved/bookmarked article workflow
+- [ ] Routing to the saved-news page
 
 ## AI Tool Disclosure
 
-- Claude (Anthropic) — used to scaffold the initial project structure.
+- Claude (Anthropic) was used to scaffold the initial project structure.
