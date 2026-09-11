@@ -166,14 +166,47 @@ These are GNews free-tier constraints, not bugs, and they are surfaced in the UI
 
 ## AI Tool Disclosure
 
-Per the hackathon AI policy, the following tools were used:
+Per the hackathon AI policy:
 
-- **Claude (Anthropic)** — used throughout the build: project scaffolding, the GNews service layer, the `useNews` status machine, the caching and bookmark hooks, component implementation and Tailwind styling, debugging (CORS on the deployed origin, a missing `<a>` tag, a stubbed `useLocalStorage`), and this README.
+- *Claude (Anthropic)* — used most heavily on *state handling* (the useNews
+  status machine, the useLocalStorage persistence hook, and the caching logic in
+  cache.js) and on *Tailwind styling* (utility classes, the responsive
+  breakpoints, and the dark theme palette). It was also used during the wider build
+  for project scaffolding, the GNews service layer, component structure, and
+  debugging — notably the CORS failure on the deployed origin.
 
-All code in this repository has been read by the team. Every member can explain and modify the files they own.
+No other AI tools were used.
+
+All code in this repository has been read by the team. Every member can explain and
+modify the files they own, and the design decisions behind them — the single status
+string over booleans, the abort-on-change cleanup, the stale-cache fallback — were
+reviewed and understood rather than accepted as generated.
 
 ---
+## Sources
 
+### GNews API
+
+Flash News uses the **GNews API** as its primary news data source.
+
+GNews is a REST API that provides access to current and historical news articles from thousands of sources worldwide. It returns structured JSON data containing information such as article titles, descriptions, images, publication dates, article URLs, and source details.
+
+In Flash News, GNews is used for:
+
+- **Top Headlines:** Fetching the latest news for the main news feed.
+- **Category News:** Loading news by categories such as World, Business, Technology, Sports, Entertainment, Science, and Health.
+- **News Search:** Searching articles based on keywords entered by the user.
+- **Article Metadata:** Providing titles, descriptions, images, publication times, source names, and links to the original articles.
+
+The application integrates with GNews through its `top-headlines` and `search` API endpoints. The API response is normalized inside the application's service layer before being passed to the React components, keeping the UI independent of the external API response format.
+
+GNews API documentation:
+https://docs.gnews.io/
+
+GNews website:
+https://gnews.io/
+
+---
 ## Code ownership
 
 | Area | Files |
