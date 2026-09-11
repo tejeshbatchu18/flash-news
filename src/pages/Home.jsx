@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Header from '../components/Header.jsx';
 import FlashTicker from '../components/FlashTicker.jsx';
 import SearchBar from '../components/SearchBar.jsx';
@@ -14,8 +14,26 @@ import useNews from '../hooks/useNews.js';
 
 function Home() {
   const [category, setCategory] = useState('general');
+  const [query, setQuery] = useState('');
   const [depth, setDepth] = useState('standard');
-  const { articles, status, error } = useNews({ category });
+  const [sort, setSort] = useState('newest');
+
+  const { articles, status, error } = useNews({ category, query });
+
+  // Picking a category abandons the current search, so the two never fight.
+  function handleCategoryChange(nextCategory) {
+    setQuery('');
+    setCategory(nextCategory);
+  }
+
+  // Copy before sorting — .sort() mutates, and mutating state is a React bug.
+  const sortedArticles = useMemo(() => {
+    return [...articles].sort((a, b) => {
+      const aTime = new Date(a.publishedAt).getTime() || 0;
+      const bTime = new Date(b.publishedAt).getTime() || 0;
+      return sort === 'newest' ? bTime - aTime : aTime - bTime;
+    });
+  }, [articles, sort]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -30,17 +48,27 @@ function Home() {
         </p>
 
         <div className="mt-6 space-y-3">
-          <SearchBar />
-          <CategoryBar value={category} onChange={setCategory} />
+          <SearchBar
+            onSearch={setQuery}
+            onClear={() => setQuery('')}
+            isLoading={status === 'loading'}
+            activeQuery={query}
+          />
+          <CategoryBar value={query ? '' : category} onChange={handleCategoryChange} />
           <NewsDepth value={depth} onChange={setDepth} />
-          <FilterBar />
+          <FilterBar
+            sort={sort}
+            onSortChange={setSort}
+            count={sortedArticles.length}
+            activeQuery={query}
+          />
         </div>
 
         <div className="mt-6">
           {status === 'loading' && <LoadingState />}
           {status === 'error' && <ErrorState message={error} />}
           {status === 'empty' && <EmptyState />}
-          {status === 'success' && <NewsGrid articles={articles} depth={depth} />}
+          {status === 'success' && <NewsGrid articles={sortedArticles} depth={depth} />}
         </div>
       </main>
     </div>
