@@ -7,7 +7,7 @@ A fast, mobile-first news reader for people on a weak or limited connection.
 
 ---
 
-## Scope Card (submitted 09:45, locked)
+## Scope Card 
 
 > **Problem:** People want to quickly catch up on news, but many news platforms are slow, cluttered, and unreliable on weak or limited internet connections.
 >
@@ -185,7 +185,7 @@ All code in this repository has been read by the team. Every member can explain 
 
 ---
 
-## Team
+## React Rangers
 
-Name One · Name Two · Name Three · Name Four
-PVPSIT Frontend Hackathon, 11 September 2026
+Dhanush · Tejesh · Balaji · Sai Prakash
+PVPSIT Frontend Hackathon
