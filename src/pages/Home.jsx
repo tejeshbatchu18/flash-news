@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import About from '../components/About.jsx';
+import AiOverview from '../components/AiOverview.jsx';
 import Header from '../components/Header.jsx';
 import FlashTicker from '../components/FlashTicker.jsx';
 import SearchBar from '../components/SearchBar.jsx';
@@ -72,8 +73,7 @@ function Home() {
           </p>
         )}
 
-        
-      <div className="mt-6">
+        <div className="mt-6">
           {status === 'loading' && <LoadingState depth={depth} />}
           {status === 'error' && <ErrorState message={error} onRetry={retry} />}
           {status === 'empty' && <EmptyState query={query} onClear={() => setQuery('')} />}
@@ -89,6 +89,8 @@ function Home() {
 
         <About />
       </main>
+
+      <AiOverview articles={sortedArticles} />
     </div>
   );
 }
